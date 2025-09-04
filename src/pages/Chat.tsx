@@ -12,7 +12,7 @@ const Chat = () => {
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && searchInput) {
       handleSubmit();
     }
   };
@@ -50,13 +50,11 @@ const Chat = () => {
   return (
     <>
       <div className="flex flex-col h-screen overflow-hidden">
-        {/* Header */}
         <div className="flex flex-row gap-3 items-center p-4 flex-shrink-0">
           <img src="/src/assets/bp_logo.png" className="h-8 w-8" />
           <p className="text-3xl font-medium">Chat</p>
         </div>
 
-        {/* Messages and Input */}
         <div className="flex flex-col flex-1 justify-end items-center gap-4 p-4 overflow-hidden">
           <ChatMessageContainer messages={messages} />
 
@@ -70,7 +68,11 @@ const Chat = () => {
             />
             <Button
               className="bg-blueprint-blue-primary"
-              onClick={handleSubmit}
+              onClick={() => {
+                if (searchInput) {
+                  handleSubmit();
+                }
+              }}
               disabled={isSearching}
             >
               <Search />
