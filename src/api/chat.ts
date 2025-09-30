@@ -18,3 +18,5 @@ export const sendMessage = async (
 
   return response;
 };
+
+export async function* executeConverseStream(data: any) {}

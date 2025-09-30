@@ -5,11 +5,13 @@ import { Search } from "lucide-react";
 import { useState } from "react";
 import { sendMessage } from "@/api/chat";
 import ChatMessage from "@/interface/ChatMessage";
+import { useAuth } from "react-oidc-context";
 
 const Chat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [searchInput, setSearchInput] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const auth = useAuth();
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchInput) {
@@ -26,6 +28,17 @@ const Chat = () => {
     addUserMessage();
     handleSearch();
     setSearchInput("");
+  };
+
+  const signOutRedirect = () => {
+    const clientId = "6bt3it6ivu28ng49ga4cvnkled";
+    const logoutUri = "http://localhost:5173/";
+    const cognitoDomain =
+      "https://us-east-10qwnhhq9t.auth.us-east-1.amazoncognito.com";
+    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
+      logoutUri
+    )}`;
+    auth.removeUser();
   };
 
   const handleSearch = async () => {
@@ -50,9 +63,29 @@ const Chat = () => {
   return (
     <>
       <div className="flex flex-col h-screen overflow-hidden">
-        <div className="flex flex-row gap-3 items-center p-4 flex-shrink-0">
-          <img src="/src/assets/bp_logo.png" className="h-8 w-8" />
-          <p className="text-3xl font-medium">Chat</p>
+        <div className="flex flex-row items-center justify-between p-4 ">
+          <div className="flex flex-row gap-3 items-center">
+            <img src="/src/assets/bp_logo.png" className="h-8 w-8" />
+            <p className="text-3xl font-medium">Chat</p>
+          </div>
+          <div className="justify-end">
+            {!auth.isAuthenticated && (
+              <button
+                onClick={() => auth.signinRedirect()}
+                className="rounded-2xl bg-blueprint-blue-primary px-4 py-3 font-bold text-sm text-white"
+              >
+                Sign in
+              </button>
+            )}
+            {auth.isAuthenticated && (
+              <button
+                onClick={() => signOutRedirect()}
+                className="rounded-2xl bg-blueprint-blue-primary px-4 py-3 font-bold text-sm text-white"
+              >
+                Sign out
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col flex-1 justify-end items-center gap-4 p-4 overflow-hidden">
