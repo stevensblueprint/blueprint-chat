@@ -12,7 +12,9 @@ const ChatMessageBubble = React.memo(
             : "bg-gray-200 text-black self-start"
         }`}
       >
-        <ReactMarkdown>{message.message}</ReactMarkdown>
+        <ReactMarkdown>
+          {message.content.map((text) => text.text).join(" ")}
+        </ReactMarkdown>
       </div>
     );
   }

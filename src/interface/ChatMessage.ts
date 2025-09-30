@@ -1,6 +1,6 @@
 interface ChatMessage {
   role: "user" | "assistant";
-  message: string;
+  content: { text: string }[];
 }
 
 export default ChatMessage;
