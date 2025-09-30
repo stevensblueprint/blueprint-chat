@@ -39,7 +39,7 @@ const Chat = () => {
 
   const signOutRedirect = () => {
     const clientId = "6bt3it6ivu28ng49ga4cvnkled";
-    const logoutUri = "http://localhost:5173/";
+    const logoutUri = "http://chat.sitblueprint.com/";
     const cognitoDomain =
       "https://us-east-10qwnhhq9t.auth.us-east-1.amazoncognito.com";
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(
