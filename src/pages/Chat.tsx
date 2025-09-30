@@ -111,7 +111,7 @@ const Chat = () => {
       <div className="flex flex-col h-screen overflow-hidden">
         <div className="flex flex-row items-center justify-between p-4">
           <div className="flex flex-row gap-3 items-center">
-            <img src="/src/assets/bp_logo.png" className="h-8 w-8" />
+            <img src="/bp_logo.png" className="h-8 w-8" />
             <p className="text-3xl font-medium">Chat</p>
           </div>
           <div className="justify-end">
