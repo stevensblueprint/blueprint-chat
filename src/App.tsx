@@ -25,7 +25,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route
-            path="/chat"
+            path="/"
             element={
               <ProtectedRoute>
                 <Chat />
