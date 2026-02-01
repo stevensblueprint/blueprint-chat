@@ -12,7 +12,7 @@ Amplify.configure({
       userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID as string,
       loginWith: {
         oauth: {
-          domain: import.meta.env.VITE_COGNITO_AUTH_DOMAIN as string,
+          domain: import.meta.env.VITE_COGNITO_DOMAIN as string,
           scopes: ["email", "openid", "profile"],
           redirectSignIn: [
             "http://localhost:5173/callback",
