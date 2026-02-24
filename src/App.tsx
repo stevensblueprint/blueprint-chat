@@ -26,11 +26,12 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={
-              <ProtectedRoute>
-                <Chat />
-              </ProtectedRoute>
-            }
+            // element={
+            //   <ProtectedRoute>
+            //     <Chat />
+            //   </ProtectedRoute>
+            // }
+            element={<Chat />}
           />
           <Route path="/callback" element={<OAuthCallback />} />
         </Routes>
