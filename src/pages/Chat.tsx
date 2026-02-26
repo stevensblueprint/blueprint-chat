@@ -6,6 +6,7 @@ import { useState } from "react";
 import ChatMessage from "@/interface/ChatMessage";
 import { useApi } from "@/api/useApi";
 import { executeConverseStream } from "@/api/chat";
+import { Navbar } from "@/components/Navbar";
 
 const Chat = () => {
   const { withAuthStream } = useApi();
@@ -96,17 +97,7 @@ const Chat = () => {
   return (
     <>
       <div className="flex flex-col h-screen overflow-hidden">
-        <div className="flex flex-row items-center justify-between p-4">
-          <div className="flex flex-row gap-3 items-center">
-            <img src="/bp_logo.png" className="h-8 w-8" />
-            <p className="text-3xl font-medium">Chat</p>
-          </div>
-          <div className="justify-end">
-            <button className="rounded-2xl bg-blueprint-blue-primary px-4 py-3 font-bold text-sm text-white hover:cursor-pointer">
-              Sign in
-            </button>
-          </div>
-        </div>
+        <Navbar />
 
         <div className="flex flex-col flex-1 justify-end items-center gap-4 p-4 overflow-hidden">
           <ChatMessageContainer messages={messages} />
