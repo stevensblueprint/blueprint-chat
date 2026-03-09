@@ -2,17 +2,16 @@ import { Button } from "@/components/ui/button";
 import ChatMessageContainer from "@/components/ChatMessageContainer";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import ChatMessage from "@/interface/ChatMessage";
-import { useApi } from "@/api/useApi";
-import { executeConverseStream } from "@/api/chat";
+import { askAgent } from "@/api/chat";
 import { Navbar } from "@/components/Navbar";
 
 const Chat = () => {
-  const { withAuthStream } = useApi();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [searchInput, setSearchInput] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  const conversationIdRef = useRef<string | undefined>(undefined);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchInput) {
@@ -20,76 +19,44 @@ const Chat = () => {
     }
   };
 
-  const addUserMessage = () => {
-    const userMessage: ChatMessage = {
-      role: "user",
-      content: [{ text: searchInput }],
-    };
+  const handleSubmit = () => {
+    const prompt = searchInput;
+    setSearchInput("");
     setMessages((prev) => [
       ...prev,
-      userMessage,
+      { role: "user", content: [{ text: prompt }] },
       { role: "assistant", content: [{ text: "" }] },
     ]);
+    handleSearch(prompt);
   };
 
-  const handleSubmit = () => {
-    addUserMessage();
-    handleSearch();
-    setSearchInput("");
-  };
-
-  const handleSearch = async () => {
+  const handleSearch = async (prompt: string) => {
     setIsSearching(true);
 
-    const command = {
-      modelId: "anthropic.claude-3-haiku-20240307-v1:0",
-      messages: [
-        ...messages,
-        { role: "user", content: [{ text: searchInput }] },
-      ],
-      system: [
-        {
-          text: "You are a conversational AI agent to assist the user.",
-        },
-      ],
-      inferenceConfig: {
-        maxTokens: 4096,
-        temperature: 0.5,
-      },
-      additionalModelRequestFields: {},
-    };
-
     try {
-      const stream = withAuthStream(() => executeConverseStream(command));
+      const { response, conversationId } = await askAgent({
+        prompt,
+        conversationId: conversationIdRef.current,
+      });
 
-      for await (const chunk of stream) {
-        setMessages((prev) =>
-          prev.map((m, i) => {
-            if (i !== prev.length - 1) return m;
+      conversationIdRef.current = conversationId;
 
-            const newText =
-              chunk.type === "text" ? chunk.text : chunk.reasoning;
-
-            const updatedContent =
-              m.content?.length > 0
-                ? m.content.map((c, idx) =>
-                    idx === 0 ? { ...c, text: c.text + newText } : c,
-                  )
-                : [{ text: newText }];
-
-            return { ...m, content: updatedContent };
-          }),
-        );
-      }
+      setMessages((prev) =>
+        prev.map((m, i) =>
+          i === prev.length - 1
+            ? { ...m, content: [{ text: response }] }
+            : m,
+        ),
+      );
     } catch (error) {
       console.log(error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: [{ text: "An error occurred. Please try again." }],
-        },
-      ]);
+      setMessages((prev) =>
+        prev.map((m, i) =>
+          i === prev.length - 1
+            ? { ...m, content: [{ text: "An error occurred. Please try again." }] }
+            : m,
+        ),
+      );
     }
     setIsSearching(false);
   };

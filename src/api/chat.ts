@@ -7,6 +7,7 @@ import {
 import { ApiStream } from "@/interface/Stream";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const AGENT_API_URL = import.meta.env.VITE_AGENT_API_URL;
 
 async function* streamChunks(response: Response) {
   const reader = response.body!.getReader();
@@ -77,6 +78,26 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
     console.error("Failed to fetch auth session:", e);
     return {};
   }
+}
+
+export interface AgentRequest {
+  prompt: string;
+  conversationId?: string;
+}
+
+export interface AgentResponse {
+  response: string;
+  conversationId: string;
+}
+
+export async function askAgent(req: AgentRequest): Promise<AgentResponse> {
+  const res = await fetch(AGENT_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(req),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
 }
 
 export async function* executeConverseStream(data: any): ApiStream {
