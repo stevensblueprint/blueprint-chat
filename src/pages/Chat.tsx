@@ -1,13 +1,16 @@
 import { Button } from "@/components/ui/button";
 import ChatMessageContainer from "@/components/ChatMessageContainer";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { ArrowUp, Search } from "lucide-react";
 import { useRef, useState } from "react";
 import ChatMessage from "@/interface/ChatMessage";
 import { askAgent } from "@/api/chat";
 import { Navbar } from "@/components/Navbar";
+import { useAuth } from "@/contexts/AuthContext";
+import byteLogo from "@/assets/byte.png";
 
 const Chat = () => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [searchInput, setSearchInput] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -61,35 +64,98 @@ const Chat = () => {
     setIsSearching(false);
   };
 
+  const isNewConversation = messages.length === 0;
+
   return (
     <>
       <div className="flex flex-col h-screen overflow-hidden">
         <Navbar />
 
-        <div className="flex flex-col flex-1 justify-end items-center gap-4 p-4 overflow-hidden">
-          <ChatMessageContainer messages={messages} />
-
-          <div className="w-1/2 rounded-2xl flex flex-row gap-2 p-4 bg-sky-100 flex-shrink-0">
-            <Input
-              placeholder="Ask Anything..."
-              onKeyDown={handleKeyDown}
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              disabled={isSearching}
+        {isNewConversation ? (
+          <div className="flex flex-col flex-1 items-center justify-center relative bg-white overflow-hidden">
+            {/* Gradient overlay — fills the bottom half, behind the content */}
+            <div
+              className="absolute bottom-0 left-0 right-0"
+              style={{ height: "50%", background: "linear-gradient(to bottom, #ffffff, #0078E8)" }}
             />
-            <Button
-              className="bg-blueprint-blue-primary"
-              onClick={() => {
-                if (searchInput) {
-                  handleSubmit();
-                }
-              }}
-              disabled={isSearching}
-            >
-              <Search />
-            </Button>
+
+            {/* Content centered over the gradient */}
+            <div className="relative flex flex-col items-center gap-6 px-8 py-6">
+              <div
+                className="flex flex-row items-center gap-3"
+                style={{ width: "min(862px, 90vw)" }}
+              >
+                <img src={byteLogo} alt="Byte" style={{ width: "80px", height: "80px", objectFit: "contain" }} />
+                <p
+                  style={{
+                    fontFamily: "Inter, sans-serif",
+                    fontStyle: "normal",
+                    fontWeight: 400,
+                    fontSize: "24px",
+                    lineHeight: "29px",
+                    color: "#000000",
+                  }}
+                >
+                  Hello{" "}
+                  <span style={{ color: "#0078E8", fontSize: "28px", fontWeight: 800 }}>
+                    {user?.firstName ?? "there"}
+                  </span>
+                  , how are you today?
+                </p>
+              </div>
+
+              <div
+                className="rounded-2xl flex flex-row gap-2 p-4 bg-white border border-gray-300 shadow-md"
+                style={{ width: "min(862px, 90vw)" }}
+              >
+                <Input
+                  placeholder="Ask Anything..."
+                  onKeyDown={handleKeyDown}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  disabled={isSearching}
+                />
+                <Button
+                  className="bg-white hover:bg-gray-100 flex-shrink-0"
+                  style={{ width: "48px", height: "48px", padding: 0 }}
+                  onClick={() => {
+                    if (searchInput) {
+                      handleSubmit();
+                    }
+                  }}
+                  disabled={isSearching}
+                >
+                  <ArrowUp size={20} color="#333333" />
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-col flex-1 justify-end items-center gap-4 p-4 overflow-hidden">
+            <ChatMessageContainer messages={messages} />
+
+            <div className="w-1/2 rounded-2xl flex flex-row gap-2 p-4 bg-sky-100 flex-shrink-0">
+              <Input
+                placeholder="Ask Anything..."
+                onKeyDown={handleKeyDown}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                disabled={isSearching}
+              />
+              <Button
+                className="bg-blueprint-blue-primary"
+                onClick={() => {
+                  if (searchInput) {
+                    handleSubmit();
+                  }
+                }}
+                disabled={isSearching}
+              >
+                <Search />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
