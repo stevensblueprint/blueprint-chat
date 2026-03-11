@@ -7,7 +7,6 @@ import {
 import { ApiStream } from "@/interface/Stream";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const AGENT_API_URL = import.meta.env.VITE_AGENT_API_URL;
 const AGENT_STREAM_URL = import.meta.env.VITE_AGENT_STREAM_URL;
 
 async function* streamChunks(response: Response) {
