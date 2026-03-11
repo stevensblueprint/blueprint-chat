@@ -37,6 +37,7 @@ jobs:
           VITE_COGNITO_REDIRECT_SIGN_OUT: ${{ secrets.VITE_COGNITO_REDIRECT_SIGN_OUT }}
           VITE_COGNITO_DOMAIN: ${{ secrets.VITE_COGNITO_DOMAIN }}
           VITE_AGENT_API_URL: ${{ secrets.VITE_AGENT_API_URL }}
+          VITE_AGENT_STREAM_URL: ${{ secrets.VITE_AGENT_STREAM_URL }}
         run: |
           if [ -f package.json ]; then npm run build; else echo "No build step"; fi
       - name: Configure AWS credentials (OIDC)

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowUp, Search } from "lucide-react";
 import { useRef, useState } from "react";
 import ChatMessage from "@/interface/ChatMessage";
-import { askAgent } from "@/api/chat";
+import { streamAgent } from "@/api/chat";
 import { Navbar } from "@/components/Navbar";
 import { useAuth } from "@/contexts/AuthContext";
 import byteLogo from "@/assets/byte.png";
@@ -36,25 +36,31 @@ const Chat = () => {
   };
 
   const handleSearch = async (prompt: string) => {
+    console.log("[handleSearch] called with prompt:", prompt);
     setIsSearching(true);
 
     try {
-      const { response, conversationId } = await askAgent({
+      console.log("[handleSearch] starting stream to:", import.meta.env.VITE_AGENT_STREAM_URL);
+      for await (const event of streamAgent({
         prompt,
         conversationId: conversationIdRef.current,
-      });
-
-      conversationIdRef.current = conversationId;
-
-      setMessages((prev) =>
-        prev.map((m, i) =>
-          i === prev.length - 1
-            ? { ...m, content: [{ text: response }] }
-            : m,
-        ),
-      );
+      })) {
+        console.log("[handleSearch] received event:", event);
+        if (event.type === "token") {
+          setMessages((prev) =>
+            prev.map((m, i) =>
+              i === prev.length - 1
+                ? { ...m, content: [{ text: m.content[0].text + event.text }] }
+                : m,
+            ),
+          );
+        } else if (event.type === "done") {
+          conversationIdRef.current = event.conversationId;
+        }
+      }
+      console.log("[handleSearch] stream complete");
     } catch (error) {
-      console.log(error);
+      console.error("[streamAgent]", error);
       setMessages((prev) =>
         prev.map((m, i) =>
           i === prev.length - 1
@@ -71,8 +77,6 @@ const Chat = () => {
       <Navbar />
 
       <div className="relative flex-1 overflow-hidden">
-
-        {/* ── Empty / new-chat state ── */}
         <div
           className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden"
           style={{
@@ -82,7 +86,6 @@ const Chat = () => {
             pointerEvents: hasMessages ? "none" : "auto",
           }}
         >
-          {/* Gradient background */}
           <div
             className="absolute bottom-0 left-0 right-0 pointer-events-none"
             style={{
@@ -90,8 +93,6 @@ const Chat = () => {
               background: "linear-gradient(to bottom, #ffffff, #0078E8)",
             }}
           />
-
-          {/* Greeting + input, centered */}
           <div className="relative flex flex-col items-center gap-6 px-8 py-6">
             <div
               className="flex flex-row items-center gap-3"
@@ -142,8 +143,6 @@ const Chat = () => {
             </div>
           </div>
         </div>
-
-        {/* ── Active chat state ── */}
         <div
           className="absolute inset-0 flex flex-col items-center gap-4 p-4 overflow-hidden"
           style={{

@@ -8,27 +8,47 @@ import { ApiStream } from "@/interface/Stream";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const AGENT_API_URL = import.meta.env.VITE_AGENT_API_URL;
+const AGENT_STREAM_URL = import.meta.env.VITE_AGENT_STREAM_URL;
 
 async function* streamChunks(response: Response) {
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
 
+  function parseLine(raw: string) {
+    const line = raw.trim();
+    if (!line) return null;
+    // Handle SSE format: strip "data: " prefix
+    const data = line.startsWith("data: ") ? line.slice(6).trim() : line;
+    // Skip other SSE directives (event:, id:, retry:)
+    if (/^(event|id|retry):/.test(data)) return null;
+    try {
+      return JSON.parse(data);
+    } catch {
+      return null;
+    }
+  }
+
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
 
-    buffer += decoder.decode(value, { stream: true });
+    const raw = decoder.decode(value, { stream: true });
+    console.log("[streamChunks] raw chunk:", JSON.stringify(raw));
+    buffer += raw;
 
     let newlineIndex: number;
     while ((newlineIndex = buffer.indexOf("\n")) >= 0) {
-      const line = buffer.slice(0, newlineIndex).trim();
+      const chunk = parseLine(buffer.slice(0, newlineIndex));
       buffer = buffer.slice(newlineIndex + 1);
-      if (line) yield JSON.parse(line);
+      if (chunk !== null) yield chunk;
     }
   }
 
-  if (buffer.trim()) yield JSON.parse(buffer);
+  if (buffer.trim()) {
+    const chunk = parseLine(buffer);
+    if (chunk !== null) yield chunk;
+  }
 }
 
 function* handleBedrockStreamError(
@@ -85,19 +105,43 @@ export interface AgentRequest {
   conversationId?: string;
 }
 
-export interface AgentResponse {
-  response: string;
-  conversationId: string;
+export interface AgentTokenEvent {
+  type: "token";
+  text: string;
 }
 
-export async function askAgent(req: AgentRequest): Promise<AgentResponse> {
-  const res = await fetch(AGENT_API_URL, {
+export interface AgentDoneEvent {
+  type: "done";
+  conversationId: string;
+  sources?: unknown[];
+}
+
+export type AgentStreamEvent = AgentTokenEvent | AgentDoneEvent;
+
+export async function* streamAgent(req: AgentRequest): AsyncGenerator<AgentStreamEvent> {
+  if (!AGENT_STREAM_URL) throw new Error("VITE_AGENT_STREAM_URL is not set");
+
+  const res = await fetch(AGENT_STREAM_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(req),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Agent request failed (${res.status}): ${body}`);
+  }
+  if (!res.body) throw new Error("Response has no body");
+
+  for await (const chunk of streamChunks(res)) {
+    // Surface Lambda invocation errors (errorType + errorMessage)
+    if (chunk.errorType || chunk.errorMessage) {
+      throw new Error(`[${chunk.errorType}] ${chunk.errorMessage}`);
+    }
+    if (chunk.type === "token" || chunk.type === "done") {
+      yield chunk as AgentStreamEvent;
+    }
+  }
 }
 
 export async function* executeConverseStream(data: any): ApiStream {
