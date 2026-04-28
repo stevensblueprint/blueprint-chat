@@ -15,7 +15,13 @@ const ChatMessageBubble = React.memo(
         }`}
       >
         {isAssistantLoadingDots ? (
-          <div className="flex gap-1">
+          <div
+            className="flex gap-1"
+            role="status"
+            aria-live="polite"
+            aria-label="Assistant is responding"
+          >
+            <span className="sr-only">Assistant is responding</span>
             <div className="h-2 w-2 bg-gray-600 rounded-full animate-bounce"></div>
             <div className="h-2 w-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: "0.15s" }}></div>
             <div className="h-2 w-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: "0.3s" }}></div>

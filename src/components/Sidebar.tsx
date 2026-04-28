@@ -77,7 +77,7 @@ export function Sidebar({
         {/* Logo - hidden when collapsed */}
         {!isCollapsed && (
           <img
-            src="/white_bp_logo.png"
+            src="/static/white_bp_logo.png"
             alt="Blueprint"
             className="w-6 h-6"
           />
@@ -88,6 +88,7 @@ export function Sidebar({
           variant="link"
           size="icon"
           onClick={onToggleSidebar}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="text-white hover:bg-white/20"
         >
           <PanelLeft size={18}/>
@@ -100,6 +101,7 @@ export function Sidebar({
           {/* New Chat Icon Button */}
           <Button
             onClick={onNewChat}
+            aria-label="New chat"
             className="text-white bg-transparent hover:bg-white hover:text-[#0078e8] hover:border-[#0078e8] p-0 transition-all"
             size="icon"
           >
@@ -149,11 +151,13 @@ export function Sidebar({
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label={`Conversation actions for ${conv.title}`}
+                      aria-expanded={menuOpen === conv.conversationId}
                       onClick={(e) => {
                         e.preventDefault();
                         setMenuOpen(menuOpen === conv.conversationId ? null : conv.conversationId);
                       }}
-                      className="absolute right-2 top-2 h-6 w-6 hidden group-hover:flex text-white hover:bg-white/20"
+                      className="absolute right-2 top-2 h-6 w-6 hidden group-hover:flex group-focus-within:flex text-white hover:bg-white/20"
                     >
                       <MoreVertical size={16} />
                     </Button>
@@ -199,6 +203,7 @@ export function Sidebar({
             {/* Logout Button */}
             <Button
               onClick={() => logout()}
+              aria-label="Sign out"
               className="w-full bg-white/10 text-white hover:bg-white/20 text-xs flex items-center gap-2 justify-center"
             >
               <LogOut size={14} />

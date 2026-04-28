@@ -34,7 +34,9 @@ const Chat = () => {
   const [sidebarState, setSidebarState] = useState<"full" | "collapsed">("full");
   const currentConversationIdRef = useRef<string | undefined>(conversationId);
 
-  const hasMessages = messages.length > 0;
+  const hasActiveConversation = Boolean(
+    conversationId ?? currentConversationIdRef.current
+  );
   const CHAT_HISTORY_API_URL = import.meta.env.VITE_CHAT_HISTORY_API_URL;
 
   // Load conversations on mount
@@ -118,10 +120,14 @@ const Chat = () => {
           }
         }
       }
-      setMessages(msgs);
+      if (currentConversationIdRef.current === convId) {
+        setMessages(msgs);
+      }
     } catch (error) {
       console.error("Failed to load conversation messages:", error);
-      setMessages([]);
+      if (currentConversationIdRef.current === convId) {
+        setMessages([]);
+      }
     } finally {
       setIsLoadingMessages(false);
     }
@@ -205,13 +211,15 @@ const Chat = () => {
       })) {
         if (event.type === "token") {
           assistantContent += event.text;
-          setMessages((prev) =>
-            prev.map((m, i) =>
-              i === prev.length - 1
-                ? { ...m, content: [{ text: assistantContent }] }
-                : m
-            )
-          );
+          if (currentConversationIdRef.current === convId) {
+            setMessages((prev) =>
+              prev.map((m, i) =>
+                i === prev.length - 1
+                  ? { ...m, content: [{ text: assistantContent }] }
+                  : m
+              )
+            );
+          }
         }
       }
 
@@ -236,16 +244,20 @@ const Chat = () => {
         console.error("Failed to persist turn:", error);
       }
 
-      await loadConversations();
+      if (currentConversationIdRef.current === convId) {
+        await loadConversations();
+      }
     } catch (error) {
       console.error("Stream error:", error);
-      setMessages((prev) =>
-        prev.map((m, i) =>
-          i === prev.length - 1
-            ? { ...m, content: [{ text: "An error occurred. Please try again." }] }
-            : m
-        )
-      );
+      if (currentConversationIdRef.current === convId) {
+        setMessages((prev) =>
+          prev.map((m, i) =>
+            i === prev.length - 1
+              ? { ...m, content: [{ text: "An error occurred. Please try again." }] }
+              : m
+          )
+        );
+      }
     } finally {
       setIsSearching(false);
     }
@@ -261,7 +273,7 @@ const Chat = () => {
     const prompt = searchInput;
     setSearchInput("");
 
-    if (!hasMessages) {
+    if (!hasActiveConversation) {
       createNewConversation(prompt);
     } else {
       addMessageToConversation(prompt);
@@ -306,10 +318,10 @@ const Chat = () => {
           <div
             className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden"
             style={{
-              opacity: hasMessages ? 0 : 1,
-              transform: hasMessages ? "translateY(-16px)" : "translateY(0)",
+              opacity: hasActiveConversation ? 0 : 1,
+              transform: hasActiveConversation ? "translateY(-16px)" : "translateY(0)",
               transition: "opacity 0.4s ease, transform 0.4s ease",
-              pointerEvents: hasMessages ? "none" : "auto",
+              pointerEvents: hasActiveConversation ? "none" : "auto",
             }}
           >
             <div
@@ -368,10 +380,10 @@ const Chat = () => {
           <div
             className="absolute inset-0 flex flex-col items-center justify-between gap-4 p-4 overflow-hidden"
             style={{
-              opacity: hasMessages ? 1 : 0,
-              transform: hasMessages ? "translateY(0)" : "translateY(16px)",
+              opacity: hasActiveConversation ? 1 : 0,
+              transform: hasActiveConversation ? "translateY(0)" : "translateY(16px)",
               transition: "opacity 0.4s ease 0.15s, transform 0.4s ease 0.15s",
-              pointerEvents: hasMessages ? "auto" : "none",
+              pointerEvents: hasActiveConversation ? "auto" : "none",
             }}
           >
             {isLoadingMessages ? (
