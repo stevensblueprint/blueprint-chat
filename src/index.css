@@ -1,13 +1,34 @@
+/* stylelint-disable-next-line */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* stylelint-disable-next-line */
 @custom-variant dark (&:is(.dark *));
 
+/* stylelint-disable-next-line */
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 3.75rem;
+  --radius: 1.25rem;
+  
+  /* Typography - Font families and sizes */
+  --font-display: "ShentoxW04-Regular", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  
+  /* Spacing scale: 4px, 8px, 16px, 24px, 32px, 48px, 80px, 120px */
+  --spacing-xs: 0.25rem;      /* 4px */
+  --spacing-sm: 0.5rem;       /* 8px */
+  --spacing-md: 1rem;         /* 16px */
+  --spacing-lg: 1.5rem;       /* 24px */
+  --spacing-xl: 2rem;         /* 32px */
+  --spacing-2xl: 3rem;        /* 48px */
+  --spacing-3xl: 5rem;        /* 80px */
+  --spacing-4xl: 7.5rem;      /* 120px */
+  
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -40,7 +61,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-blueprint-blue-primary: #0078e8;
-  --color-blueprint-blue-secondary: #93c9fe;
+  --color-blueprint-blue-secondary: #95c9ff;
 }
 
 :root {
@@ -112,11 +133,71 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* stylelint-disable unknownAtRules */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body;
+  }
+  
+  /* Typography Scale */
+  .text-display-lg {
+    @apply font-display text-6xl font-normal leading-tight;
+  }
+  
+  .text-display-md {
+    @apply font-display text-5xl font-normal leading-tight;
+  }
+  
+  .text-display-sm {
+    @apply font-display text-4xl font-normal leading-tight;
+  }
+  
+  .text-heading-lg {
+    @apply font-body text-3xl font-semibold leading-snug;
+  }
+  
+  .text-heading-md {
+    @apply font-body text-2xl font-semibold leading-snug;
+  }
+  
+  .text-heading-sm {
+    @apply font-body text-xl font-semibold leading-snug;
+  }
+  
+  .text-body-lg {
+    @apply font-body text-lg font-normal leading-normal;
+  }
+  
+  .text-body-md {
+    @apply font-body text-base font-normal leading-normal;
+  }
+  
+  .text-body-sm {
+    @apply font-body text-sm font-normal leading-normal;
+  }
+  
+  .text-caption {
+    @apply font-body text-xs font-light leading-normal;
+  }
+  
+  /* Spacing utilities using the Blueprint scale */
+  .p-xs {
+    @apply p-[0.25rem];
+  }
+  
+  .p-sm {
+    @apply p-[0.5rem];
+  }
+  
+  .gap-xs {
+    @apply gap-[0.25rem];
+  }
+  
+  .gap-sm {
+    @apply gap-[0.5rem];
   }
 }
+/* stylelint-enable unknownAtRules */

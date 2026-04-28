@@ -10,7 +10,7 @@ export const OAuthCallback = () => {
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      const redirect = sessionStorage.getItem("oauth_redirect") || "/dashboard";
+      const redirect = sessionStorage.getItem("oauth_redirect") || "/";
       sessionStorage.removeItem("oauth_redirect");
       navigate(redirect);
     }
@@ -26,6 +26,14 @@ function App() {
         <Routes>
           <Route
             path="/"
+            element={
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/conversations/:conversationId"
             element={
               <ProtectedRoute>
                 <Chat />

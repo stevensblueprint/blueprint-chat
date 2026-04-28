@@ -4,17 +4,27 @@ import ReactMarkdown from "react-markdown";
 
 const ChatMessageBubble = React.memo(
   ({ message }: { message: ChatMessage }) => {
+    const isAssistantLoadingDots = message.role === "assistant" && message.content[0]?.text === "";
+
     return (
       <div
-        className={`max-w-md py-2 px-4 rounded-lg ${
+        className={`max-w-[800px] rounded-[20px] font-body text-sm leading-normal min-h-[44px] flex items-center ${
           message.role === "user"
-            ? "bg-blue-500 text-white self-end"
-            : "bg-gray-200 text-black self-start"
+            ? "bg-[#0078e8] text-white self-end py-3 px-4"
+            : "bg-gray-200 text-gray-900 self-start py-3 px-4"
         }`}
       >
-        <ReactMarkdown>
-          {message.content.map((text) => text.text).join(" ")}
-        </ReactMarkdown>
+        {isAssistantLoadingDots ? (
+          <div className="flex gap-1">
+            <div className="h-2 w-2 bg-gray-600 rounded-full animate-bounce"></div>
+            <div className="h-2 w-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: "0.15s" }}></div>
+            <div className="h-2 w-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: "0.3s" }}></div>
+          </div>
+        ) : (
+          <ReactMarkdown>
+            {message.content.map((text) => text.text).join(" ")}
+          </ReactMarkdown>
+        )}
       </div>
     );
   }

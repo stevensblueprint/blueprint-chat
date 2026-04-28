@@ -14,7 +14,8 @@ const ChatMessageContainer = ({ messages }: { messages: ChatMessage[] }) => {
   return (
     <div
       ref={containerRef}
-      className="w-1/2 h-full overflow-y-auto flex flex-col gap-2 p-2"
+      className="flex-1 overflow-y-auto w-full flex flex-col gap-4 p-6"
+      style={{ width: "100%", maxWidth: "1800px", alignItems: "flex-start" }}
     >
       {messages.map((msg, index) => (
         <ChatMessageBubble key={index} message={msg} />
