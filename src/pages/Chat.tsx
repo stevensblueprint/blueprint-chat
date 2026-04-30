@@ -161,10 +161,9 @@ const Chat = () => {
         { role: "assistant", content: [{ text: "" }] },
       ]);
 
-      await loadConversations();
-
       // Stream response first to persist the turn, then navigate
-      await streamResponse(initialMessage, newConv.conversationId);
+      await streamResponse(initialMessage, newConv.conversationId, user.id);
+      await loadConversations();
 
       // Navigate after turn is persisted so useEffect loads the correct messages
       navigate(`/conversations/${newConv.conversationId}`);
@@ -187,7 +186,7 @@ const Chat = () => {
         { role: "assistant", content: [{ text: "" }] },
       ]);
 
-      await streamResponse(prompt, currentConversationIdRef.current);
+      await streamResponse(prompt, currentConversationIdRef.current, user.id);
     } catch (error) {
       console.error("Failed to send message:", error);
       setMessages((prev) =>
@@ -201,13 +200,14 @@ const Chat = () => {
     }
   };
 
-  const streamResponse = async (prompt: string, convId: string) => {
+  const streamResponse = async (prompt: string, convId: string, uid: string) => {
     try {
       let assistantContent = "";
 
       for await (const event of streamAgent({
         prompt,
         conversationId: convId,
+        userId: uid,
       })) {
         if (event.type === "token") {
           assistantContent += event.text;
@@ -221,27 +221,6 @@ const Chat = () => {
             );
           }
         }
-      }
-
-      try {
-        if (user?.id) {
-          const session = await fetchAuthSession();
-          const idToken = session.tokens?.idToken?.toString();
-          await axios.post(
-            `${CHAT_HISTORY_API_URL}/conversations/${convId}/turns?userId=${user.id}`,
-          {
-            message: prompt,
-            assistantMessage: assistantContent,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${idToken}`,
-            },
-          }
-        );
-        }
-      } catch (error) {
-        console.error("Failed to persist turn:", error);
       }
 
       if (currentConversationIdRef.current === convId) {

@@ -102,6 +102,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 export interface AgentRequest {
   prompt: string;
   conversationId?: string;
+  userId?: string;
 }
 
 export interface AgentTokenEvent {
@@ -123,7 +124,11 @@ export async function* streamAgent(req: AgentRequest): AsyncGenerator<AgentStrea
   const res = await fetch(AGENT_STREAM_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(req),
+    body: JSON.stringify({
+      prompt: req.prompt,
+      conversationId: req.conversationId,
+      userId: req.userId,
+  }),
   });
 
   if (!res.ok) {
@@ -133,6 +138,7 @@ export async function* streamAgent(req: AgentRequest): AsyncGenerator<AgentStrea
   if (!res.body) throw new Error("Response has no body");
 
   for await (const chunk of streamChunks(res)) {
+    console.log(chunk);
     // Surface Lambda invocation errors (errorType + errorMessage)
     if (chunk.errorType || chunk.errorMessage) {
       throw new Error(`[${chunk.errorType}] ${chunk.errorMessage}`);
