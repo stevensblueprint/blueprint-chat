@@ -14,11 +14,14 @@ const ChatMessageContainer = ({ messages }: { messages: ChatMessage[] }) => {
   return (
     <div
       ref={containerRef}
-      className="w-1/2 h-full overflow-y-auto flex flex-col gap-2 p-2"
+      className="overflow-y-auto w-full p-6"
+      style={{ flex: "1 1 0", minHeight: 0 }}
     >
-      {messages.map((msg, index) => (
-        <ChatMessageBubble key={index} message={msg} />
-      ))}
+      <div className="flex flex-col gap-4">
+        {messages.map((msg, index) => (
+          <ChatMessageBubble key={index} message={msg} />
+        ))}
+      </div>
     </div>
   );
 };
